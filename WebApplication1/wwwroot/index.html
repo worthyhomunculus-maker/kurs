@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Гномья сортировка</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--primary);
+    }
+
+    .hidden { display: none !important; }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .btn-danger { background: var(--danger); }
+    .btn-success { background: var(--success); }
+    .btn-warning { background: var(--warning); color: var(--bg); }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.95rem;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .result {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px;
+      margin-top: 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .history-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ЦИФРОВОЙ ИНДИКАТОР МАССИВА */
+    .array-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      min-height: 60px;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+
+    .array-display.empty {
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .digit-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 50px;
+    }
+
+    .digit-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 600;
+      background: #0c1427;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .digit-index {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ГНОМЬЯ СОРТИРОВКА</h1>
+    </header>
+
+    <!-- Панель авторизации -->
+    <div id="authPanel" class="panel">
+      <div class="panel-header">
+        <div class="panel-title">АВТОРИЗАЦИЯ</div>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchAuthTab('login')">ВХОД</button>
+        <button class="tab-btn" onclick="switchAuthTab('register')">РЕГИСТРАЦИЯ</button>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>ИМЯ ПОЛЬЗОВАТЕЛЯ</label>
+          <input type="text" id="loginUsername" required />
+        </div>
+        <div class="form-group">
+          <label>ПАРОЛЬ</label>
+          <input type="password" id="loginPassword" required />
+        </div>
+        <button type="submit">ВОЙТИ</button>
+      </form>
+
+      <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>ИМЯ ПОЛЬЗОВАТЕЛЯ</label>
+          <input type="text" id="regUsername" required />
+        </div>
+        <div class="form-group">
+          <label>ПАРОЛЬ</label>
+          <input type="password" id="regPassword" required />
+        </div>
+        <button type="submit" class="btn-success">СОЗДАТЬ АККАУНТ</button>
+      </form>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="appPanel" class="hidden">
+      <div class="panel-header">
+        <div class="panel-title">ПАНЕЛЬ УПРАВЛЕНИЯ</div>
+        <button class="btn-danger" onclick="logout()" style="width: auto;">ВЫЙТИ</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchAppTab('array')">МАССИВ</button>
+        <button class="tab-btn" onclick="switchAppTab('sortedArrays')">ОТСОРТИРОВАННЫЕ</button>
+        <button class="tab-btn" onclick="switchAppTab('history')">ИСТОРИЯ</button>
+        <button class="tab-btn" onclick="switchAppTab('stats')">СТАТИСТИКА</button>
+        <button class="tab-btn" onclick="switchAppTab('settings')">НАСТРОЙКИ</button>
+      </div>
+
+      <!-- Управление массивом -->
+      <div id="arrayTab" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">ТЕКУЩИЙ МАССИВ</div>
+        </div>
+        
+        <div id="arrayDisplay" class="array-display empty">
+          НЕТ ДАННЫХ
+        </div>
+
+        <div class="form-group">
+          <label>ЗАДАТЬ МАССИВ (через запятую)</label>
+          <input type="text" id="setArrayInput" placeholder="3,1,4,1,5" />
+          <button onclick="setArray()">ЗАДАТЬ</button>
+        </div>
+
+        <div class="form-group">
+          <button onclick="generateArray()">СГЕНЕРИРОВАТЬ СЛУЧАЙНЫЙ</button>
+        </div>
+
+        <div class="form-group">
+          <button onclick="sortArray()">ОТСОРТИРОВАТЬ</button>
+        </div>
+
+        <div class="form-group">
+          <label>ДОБАВИТЬ ЭЛЕМЕНТЫ</label>
+          <input type="text" id="addElementsInput" placeholder="2,7" />
+          <select id="addPosition">
+            <option value="end">В КОНЕЦ</option>
+            <option value="start">В НАЧАЛО</option>
+            <option value="after">ПОСЛЕ ИНДЕКСА</option>
+          </select>
+          <input type="number" id="addIndex" placeholder="ИНДЕКС" style="display:none;" />
+          <button onclick="addElements()">ДОБАВИТЬ</button>
+        </div>
+
+        <div class="form-group">
+          <label>ЗАПРОС ПО ДИАПАЗОНУ</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="number" id="rangeFrom" placeholder="ОТ" min="0" style="width: auto;" />
+            <input type="number" id="rangeTo" placeholder="ДО" min="0" style="width: auto;" />
+            <button onclick="getRange()" style="width: auto;">ПОЛУЧИТЬ</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button class="btn-danger" onclick="deleteArray()">ОЧИСТИТЬ МАССИВ</button>
+        </div>
+
+        <div id="arrayResult" class="result hidden"></div>
+        <div id="rangeResult" class="result hidden"></div>
+      </div>
+
+      <!-- Отсортированные массивы -->
+      <div id="sortedArraysTab" class="panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">ИСТОРИЯ СОРТИРОВОК</div>
+        </div>
+        <button onclick="loadSortedArrays()" style="margin-bottom: 15px; width: auto;">ОБНОВИТЬ</button>
+        <div id="sortedArraysList" class="result"></div>
+      </div>
+
+      <!-- История -->
+      <div id="historyTab" class="panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">ИСТОРИЯ ОПЕРАЦИЙ</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchHistoryView('my')">МОЯ ИСТОРИЯ</button>
+          <button class="tab-btn" onclick="switchHistoryView('all')">ОБЩАЯ ИСТОРИЯ</button>
+        </div>
+        <div id="myHistoryView">
+          <div class="form-group">
+            <select id="myActionFilter">
+              <option value="">ВСЕ ДЕЙСТВИЯ</option>
+              <option value="login">ВХОД</option>
+              <option value="register">РЕГИСТРАЦИЯ</option>
+              <option value="sort_array">СОРТИРОВКА</option>
+              <option value="generate_array">ГЕНЕРАЦИЯ</option>
+              <option value="modify_array">ИЗМЕНЕНИЕ</option>
+            </select>
+            <button onclick="applyMyFilter()" style="margin-top: 8px; width: auto;">ПРИМЕНИТЬ ФИЛЬТР</button>
+            <button class="btn-danger" onclick="clearMyHistory()" style="margin-top: 8px; width: auto;">ОЧИСТИТЬ МОЮ ИСТОРИЮ</button>
+          </div>
+          <div id="myHistoryResult" class="result"></div>
+        </div>
+        <div id="allHistoryView" class="hidden">
+          <button class="btn-danger" onclick="clearAllHistory()" style="margin-bottom: 15px; width: auto;">ОЧИСТИТЬ ВСЮ ИСТОРИЮ</button>
+          <div id="allHistoryResult" class="result"></div>
+        </div>
+      </div>
+
+      <!-- Статистика -->
+      <div id="statsTab" class="panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">СТАТИСТИКА СИСТЕМЫ</div>
+        </div>
+        <button onclick="loadStatistics()" style="margin-bottom: 15px; width: auto;">ОБНОВИТЬ СТАТИСТИКУ</button>
+        <div id="statisticsResult" class="result"></div>
+      </div>
+
+      <!-- Настройки -->
+      <div id="settingsTab" class="panel hidden">
+        <div class="panel-header">
+          <div class="panel-title">НАСТРОЙКИ АККАУНТА</div>
+        </div>
+        <div class="form-group">
+          <label>НОВЫЙ ПАРОЛЬ</label>
+          <input type="password" id="newPassword" />
+        </div>
+        <div class="form-group">
+          <label>СТАРЫЙ ПАРОЛЬ (если требуется)</label>
+          <input type="password" id="oldPassword" />
+        </div>
+        <button onclick="changePassword()">ИЗМЕНИТЬ ПАРОЛЬ</button>
+        <hr style="margin: 20px 0; border-color: var(--border);" />
+        <button class="btn-danger" onclick="deleteAccount()">УДАЛИТЬ АККАУНТ</button>
+      </div>
+    </div>
+
+    <footer>
+      <p>ГНОМЬЯ СОРТИРОВКА • ВСЕ ОПЕРАЦИИ ЗАПИСЫВАЮТСЯ</p>
+    </footer>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    // ========== АВТОРИЗАЦИЯ ==========
+    function switchAuthTab(tab) {
+      document.querySelectorAll('#authPanel .tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (tab === 'login') {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.querySelector('[onclick="switchAuthTab(\'login\')"]').classList.add('active');
+      } else {
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
+        document.querySelector('[onclick="switchAuthTab(\'register\')"]').classList.add('active');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = { id: Number(data.userId), username: data.username };
+          if (isNaN(currentUser.id)) throw new Error('Invalid user ID');
+          showApp();
+        } else {
+          alert('Ошибка входа: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('regUsername').value;
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          alert('Регистрация прошла успешно. Пожалуйста, войдите.');
+          switchAuthTab('login');
+        } else {
+          alert('Ошибка регистрации: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    function logout() {
+      fetch('/logout', { method: 'POST' }).catch(() => {});
+      currentUser = null;
+      document.getElementById('appPanel').classList.add('hidden');
+      document.getElementById('authPanel').classList.remove('hidden');
+    }
+
+    // ========== ПРИЛОЖЕНИЕ ==========
+    function showApp() {
+      document.getElementById('authPanel').classList.add('hidden');
+      document.getElementById('appPanel').classList.remove('hidden');
+      loadCurrentArray();
+      loadStatistics(); // Загружаем статистику сразу
+    }
+
+    function switchAppTab(tab) {
+      document.querySelectorAll('#appPanel .tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('#appPanel > div[id$="Tab"]').forEach(el => el.classList.add('hidden'));
+
+      if (tab === 'array') {
+        document.querySelector('[onclick="switchAppTab(\'array\')"]').classList.add('active');
+        document.getElementById('arrayTab').classList.remove('hidden');
+      } else if (tab === 'sortedArrays') {
+        document.querySelector('[onclick="switchAppTab(\'sortedArrays\')"]').classList.add('active');
+        document.getElementById('sortedArraysTab').classList.remove('hidden');
+        loadSortedArrays();
+      } else if (tab === 'history') {
+        document.querySelector('[onclick="switchAppTab(\'history\')"]').classList.add('active');
+        document.getElementById('historyTab').classList.remove('hidden');
+        switchHistoryView('my');
+      } else if (tab === 'stats') {
+        document.querySelector('[onclick="switchAppTab(\'stats\')"]').classList.add('active');
+        document.getElementById('statsTab').classList.remove('hidden');
+        loadStatistics();
+      } else if (tab === 'settings') {
+        document.querySelector('[onclick="switchAppTab(\'settings\')"]').classList.add('active');
+        document.getElementById('settingsTab').classList.remove('hidden');
+      }
+    }
+
+    // ========== ОТОБРАЖЕНИЕ МАССИВА ==========
+    function renderArrayDisplay(array) {
+      const container = document.getElementById('arrayDisplay');
+      container.innerHTML = '';
+
+      if (!array || array.length === 0) {
+        container.className = 'array-display empty';
+        container.textContent = 'НЕТ ДАННЫХ';
+        return;
+      }
+
+      container.className = 'array-display';
+      array.forEach((value, index) => {
+        const digit = document.createElement('div');
+        digit.className = 'digit-display';
+        digit.innerHTML = `
+          <div class="digit-value">${value}</div>
+          <div class="digit-index">[${index}]</div>
+        `;
+        container.appendChild(digit);
+      });
+    }
+
+    function hideResults() {
+      document.getElementById('arrayResult').classList.add('hidden');
+      document.getElementById('rangeResult').classList.add('hidden');
+    }
+
+    function showResult(id, text) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.classList.remove('hidden');
+    }
+
+    // ========== РАБОТА С МАССИВОМ ==========
+    document.getElementById('addPosition').addEventListener('change', function() {
+      const indexInput = document.getElementById('addIndex');
+      indexInput.style.display = this.value === 'after' ? 'block' : 'none';
+    });
+
+    async function loadCurrentArray() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array`);
+        if (res.ok) {
+          const data = await res.json();
+          renderArrayDisplay(data.array);
+        } else {
+          renderArrayDisplay([]);
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки массива:', err);
+        renderArrayDisplay([]);
+      }
+    }
+
+    async function setArray() {
+      hideResults();
+      const input = document.getElementById('setArrayInput').value.trim();
+      if (!input) return alert('Введите числа через запятую');
+      const numbers = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      if (numbers.length === 0) return alert('Некорректные числа');
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array/set`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numbers })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showResult('arrayResult', `МАССИВ ЗАДАН: [${data.array.join(', ')}]`);
+          renderArrayDisplay(data.array);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function generateArray() {
+      hideResults();
+      const size = prompt('Размер массива (например, 10):', '10');
+      const min = prompt('Минимальное значение:', '0');
+      const max = prompt('Максимальное значение:', '100');
+
+      if (!size || !min || !max) return;
+
+      const sizeNum = parseInt(size);
+      const minNum = parseInt(min);
+      const maxNum = parseInt(max);
+
+      if (isNaN(sizeNum) || isNaN(minNum) || isNaN(maxNum)) {
+        alert('Введите корректные числа');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ size: sizeNum, minValue: minNum, maxValue: maxNum })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showResult('arrayResult', `СГЕНЕРИРОВАНО: [${data.array.join(', ')}]`);
+          renderArrayDisplay(data.array);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function sortArray() {
+      hideResults();
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array/sort`, { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          showResult('arrayResult', `ОТСОРТИРОВАНО!\nИсходный: [${data.originalArray.join(', ')}]\nРезультат: [${data.sortedArray.join(', ')}]`);
+          renderArrayDisplay(data.sortedArray);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function addElements() {
+      hideResults();
+      const elementsStr = document.getElementById('addElementsInput').value.trim();
+      const position = document.getElementById('addPosition').value;
+      const index = position === 'after' ? parseInt(document.getElementById('addIndex').value) : null;
+
+      if (!elementsStr) return alert('Введите элементы');
+      const elements = elementsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      if (elements.length === 0) return alert('Некорректные числа');
+
+      const body = { elements, position };
+      if (index !== null) {
+        if (isNaN(index)) return alert('Индекс должен быть числом');
+        body.index = index;
+      }
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array/add`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          showResult('arrayResult', `ДОБАВЛЕНО ${position.toUpperCase()}: [${data.newArray.join(', ')}]`);
+          renderArrayDisplay(data.newArray);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function deleteArray() {
+      hideResults();
+      if (!confirm('Очистить текущий массив?')) return;
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array`, { method: 'DELETE' });
+        if (res.ok) {
+          showResult('arrayResult', 'МАССИВ ОЧИЩЕН');
+          renderArrayDisplay([]);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function getRange() {
+      const from = document.getElementById('rangeFrom').value;
+      const to = document.getElementById('rangeTo').value;
+
+      if (from === '' || to === '') return alert('Введите оба индекса');
+      const fromIndex = parseInt(from);
+      const toIndex = parseInt(to);
+      if (isNaN(fromIndex) || isNaN(toIndex)) return alert('Индексы должны быть числами');
+      if (fromIndex > toIndex) return alert('ОТ не может быть больше ДО');
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/array/range/${fromIndex}/${toIndex}`);
+        if (res.ok) {
+          const data = await res.json();
+          showResult('rangeResult', `ДИАПАЗОН [${data.fromIndex}–${data.toIndex}]: [${data.subArray.join(', ')}]`);
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    // ========== ИСТОРИЯ И СТАТИСТИКА ==========
+    async function loadSortedArrays() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/users/${currentUser.id}/sorted-arrays`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const container = document.getElementById('sortedArraysList');
+        if (!data.arrays || data.arrays.length === 0) {
+          container.textContent = 'НЕТ ОТСОРТИРОВАННЫХ МАССИВОВ';
+          return;
+        }
+        let html = '';
+        data.arrays.forEach(item => {
+          const time = new Date(item.timestamp).toLocaleString('ru-RU');
+          html += `[${time}] ИСХОДНЫЙ: [${item.originalArray.join(', ')}] → ОТСОРТИРОВАННЫЙ: [${item.sortedArray.join(', ')}]\n`;
+        });
+        container.textContent = html;
+      } catch (err) {
+        document.getElementById('sortedArraysList').textContent = 'ОШИБКА ЗАГРУЗКИ: ' + err.message;
+      }
+    }
+
+    async function loadMyHistory(filter = '') {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/users/${currentUser.id}/history`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        let items = data.history || [];
+        if (filter) items = items.filter(h => h.action === filter);
+        renderHistory(items, 'myHistoryResult');
+      } catch (err) {
+        document.getElementById('myHistoryResult').textContent = 'ОШИБКА ЗАГРУЗКИ: ' + err.message;
+      }
+    }
+
+    function applyMyFilter() {
+      const action = document.getElementById('myActionFilter').value;
+      loadMyHistory(action);
+    }
+
+    function renderHistory(items, containerId) {
+      const container = document.getElementById(containerId);
+      if (!items || items.length === 0) {
+        container.textContent = 'НЕТ ЗАПИСЕЙ';
+        return;
+      }
+      let html = '';
+      items.forEach(h => {
+        const time = new Date(h.timestamp).toLocaleString('ru-RU');
+        html += `[${time}] @${h.username || '—'} | ${h.action || '—'}: ${h.details || '—'}\n`;
+      });
+      container.textContent = html;
+    }
+
+    function switchHistoryView(view) {
+      document.querySelectorAll('#historyTab .tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (view === 'my') {
+        document.querySelector('[onclick="switchHistoryView(\'my\')"]').classList.add('active');
+        document.getElementById('myHistoryView').classList.remove('hidden');
+        document.getElementById('allHistoryView').classList.add('hidden');
+        applyMyFilter();
+      } else {
+        document.querySelector('[onclick="switchHistoryView(\'all\')"]').classList.add('active');
+        document.getElementById('allHistoryView').classList.remove('hidden');
+        document.getElementById('myHistoryView').classList.add('hidden');
+        loadAllHistory();
+      }
+    }
+
+    async function loadAllHistory() {
+      try {
+        const res = await fetch('/history');
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderHistory(data.history || [], 'allHistoryResult');
+      } catch (err) {
+        document.getElementById('allHistoryResult').textContent = 'ОШИБКА ЗАГРУЗКИ: ' + err.message;
+      }
+    }
+
+    async function loadStatistics() {
+      try {
+        const res = await fetch('/statistics');
+        if (!res.ok) throw new Error(await res.text());
+        const stats = await res.json();
+        const container = document.getElementById('statisticsResult');
+        container.innerHTML = `
+ПОЛЬЗОВАТЕЛИ: ${stats.users}
+АКТИВНЫЕ МАССИВЫ: ${stats.activeArrays}
+ВСЕГО ОТСОРТИРОВАННЫХ МАССИВОВ: ${stats.totalSortedArrays}
+ВСЕГО ЗАПИСЕЙ В ИСТОРИИ: ${stats.totalHistoryRecords}
+ОПЕРАЦИЙ СОРТИРОВКИ: ${stats.sortOperations}
+ПОСЛЕДНЯЯ СОРТИРОВКА: ${stats.lastSortAction} пользователем ${stats.lastSortUser} в ${stats.lastSortTime}
+        `.trim();
+      } catch (err) {
+        document.getElementById('statisticsResult').textContent = 'ОШИБКА ЗАГРУЗКИ СТАТИСТИКИ: ' + err.message;
+      }
+    }
+
+    // ========== ОЧИСТКА ИСТОРИИ ==========
+    async function clearMyHistory() {
+      if (!currentUser) return;
+      if (!confirm('Вы уверены, что хотите удалить всю свою историю операций? Это действие нельзя отменить.')) return;
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/history`, { method: 'DELETE' });
+        if (res.ok) {
+          alert('Ваша история успешно очищена.');
+          loadMyHistory(); // Обновляем отображение
+        } else {
+          alert('Ошибка при очистке истории: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function clearAllHistory() {
+      if (!confirm('Вы уверены, что хотите удалить ВСЮ системную историю? Это действие нельзя отменить и затронет всех пользователей.')) return;
+
+      try {
+        const res = await fetch('/history', { method: 'DELETE' });
+        if (res.ok) {
+          alert('Вся история успешно очищена.');
+          loadAllHistory(); // Обновляем отображение
+        } else {
+          alert('Ошибка при очистке общей истории: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    // ========== НАСТРОЙКИ ==========
+    async function changePassword() {
+      const newPassword = document.getElementById('newPassword').value;
+      const oldPassword = document.getElementById('oldPassword').value || null;
+      if (!newPassword) return alert('Введите новый пароль');
+
+      try {
+        const res = await fetch(`/users/${currentUser.id}/password`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ oldPassword, newPassword })
+        });
+
+        if (res.ok) {
+          alert('Пароль обновлён');
+          document.getElementById('newPassword').value = '';
+          document.getElementById('oldPassword').value = '';
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+
+    async function deleteAccount() {
+      if (!confirm('Удалить аккаунт навсегда?')) return;
+      try {
+        const res = await fetch(`/users/${currentUser.id}`, { method: 'DELETE' });
+        if (res.ok) {
+          alert('Аккаунт удалён');
+          logout();
+        } else {
+          alert('Ошибка: ' + (await res.text()));
+        }
+      } catch (err) {
+        alert('Ошибка подключения: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

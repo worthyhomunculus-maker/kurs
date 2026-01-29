@@ -1,0 +1,13 @@
+{
+  "Users": [
+    {
+      "Id": 1,
+      "Username": "loginuser",
+      "Password": "c2VjcmV0",
+      "CurrentArray": [],
+      "SortedArrays": []
+    }
+  ],
+  "History": [],
+  "NextUserId": 2
+}
